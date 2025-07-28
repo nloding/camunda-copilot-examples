@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleflow xmlns="http://drools.org/drools-5.0/process"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://drools.org/drools-5.0/process drools-processes-5.0.xsd">
+  
+    <id>com.insurance.claim</id>
+    <name>AutomobileClaimProcess</name>
+    <version>1.0</version>
+    <package>com.insurance.rules</package>
+    <start id="1" name="Start" />
+
+    <!-- Check if driver is insured -->
+    <ruleTask id="2" name="Check Insurance Status">
+        <ruleFlowGroup>InsuranceStatusCheck</ruleFlowGroup>
+        <connection from="1" to="2"/>
+    </ruleTask>
+
+    <split id="3" name="Insurance Decision" type="xor">
+        <constraint to="4" name="Uninsured" priority="1">return !claim.isInsured();</constraint>
+        <constraint to="5" name="Insured" priority="2">return claim.isInsured();</constraint>
+        <connection from="2" to="3"/>
+    </split>
+
+    <!-- Deny Claim if Uninsured -->
+    <actionNode id="4" name="Deny Claim">
+        <action type="expression">System.out.println("Claim Denied: Driver Uninsured");</action>
+        <connection from="3" to="4"/>
+    </actionNode>
+
+    <!-- Check Policy Coverage -->
+    <ruleTask id="5" name="Check Policy Coverage">
+        <ruleFlowGroup>PolicyCoverageCheck</ruleFlowGroup>
+        <connection from="3" to="5"/>
+    </ruleTask>
+
+    <split id="6" name="Coverage Decision" type="xor">
+        <constraint to="7" name="No Coverage" priority="1">return !claim.isCovered();</constraint>
+        <constraint to="8" name="Covered" priority="2">return claim.isCovered();</constraint>
+        <connection from="5" to="6"/>
+    </split>
+
+    <!-- Deny Claim if Coverage is Insufficient -->
+    <actionNode id="7" name="Deny Claim">
+        <action type="expression">System.out.println("Claim Denied: Policy does not cover this incident");</action>
+        <connection from="6" to="7"/>
+    </actionNode>
+
+    <!-- Check Accident Severity -->
+    <ruleTask id="8" name="Check Accident Severity">
+        <ruleFlowGroup>AccidentSeverityCheck</ruleFlowGroup>
+        <connection from="6" to="8"/>
+    </ruleTask>
+
+    <split id="9" name="Severity Decision" type="xor">
+        <constraint to="10" name="Too Severe" priority="1">return claim.getSeverity() > 8;</constraint>
+        <constraint to="11" name="Manageable" priority="2">return claim.getSeverity() <= 8;</constraint>
+        <connection from="8" to="9"/>
+    </split>
+
+    <!-- Send to Manual Review if Severity is High -->
+    <actionNode id="10" name="Manual Review">
+        <action type="expression">System.out.println("Claim requires manual review");</action>
+        <connection from="9" to="10"/>
+    </actionNode>
+
+    <!-- Approve Claim if All Conditions Met -->
+    <actionNode id="11" name="Approve Claim">
+        <action type="expression">System.out.println("Claim Approved!");</action>
+        <connection from="9" to="11"/>
+    </actionNode>
+
+    <end id="12" name="End" />
+    <connection from="4" to="12"/>
+    <connection from="7" to="12"/>
+    <connection from="10" to="12"/>
+    <connection from="11" to="12"/>
+
+</ruleflow>

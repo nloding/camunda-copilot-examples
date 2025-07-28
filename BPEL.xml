@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process name="AutomobileClaimProcess" targetNamespace="http://example.com/automobileClaim" xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable">
+    
+    <partnerLinks>
+        <partnerLink name="CustomerService" partnerLinkType="customerType" myRole="ClaimReceiver" />
+        <partnerLink name="InsuranceService" partnerLinkType="insuranceType" myRole="ClaimProcessor" />
+        <partnerLink name="PaymentService" partnerLinkType="paymentType" myRole="PaymentProcessor" />
+    </partnerLinks>
+    
+    <variables>
+        <variable name="claimRequest" messageType="tns:ClaimRequest" />
+        <variable name="claimResponse" messageType="tns:ClaimResponse" />
+        <variable name="assessmentResult" messageType="tns:AssessmentResult" />
+        <variable name="paymentInfo" messageType="tns:PaymentInfo" />
+    </variables>
+    
+    <sequence>
+        <!-- Receive Claim Request -->
+        <receive name="ReceiveClaim" partnerLink="CustomerService" operation="SubmitClaim" variable="claimRequest" createInstance="yes" />
+        
+        <!-- Validate Claim -->
+        <invoke name="ValidateClaim" partnerLink="InsuranceService" operation="ValidateClaim" inputVariable="claimRequest" outputVariable="assessmentResult" />
+        
+        <!-- Check Assessment Result -->
+        <switch name="AssessClaim">
+            <case condition="bpws:getVariableData('assessmentResult','status') = 'Approved'">
+                <!-- Process Approved Claim -->
+                <invoke name="ProcessPayment" partnerLink="PaymentService" operation="InitiatePayment" inputVariable="paymentInfo" outputVariable="claimResponse" />
+            </case>
+            <otherwise>
+                <!-- Reject Claim -->
+                <reply name="RejectClaim" partnerLink="CustomerService" operation="ClaimResponse" variable="claimResponse" />
+            </otherwise>
+        </switch>
+        
+        <!-- Send Response to Customer -->
+        <reply name="SendClaimResponse" partnerLink="CustomerService" operation="ClaimResponse" variable="claimResponse" />
+    </sequence>
+    
+</process>

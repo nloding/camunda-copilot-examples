@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CaseType name="AutoClaimProcessing" class="AutoClaim-Work-Processing">
+    <Stages>
+        <Stage name="Claim Submission">
+            <Process name="Submit Claim">
+                <Step type="Collect Information" name="Capture Claim Details" />
+                <Step type="Approval" name="Verify Claim Information" />
+            </Process>
+        </Stage>
+        <Stage name="Claim Assessment">
+            <Process name="Damage Assessment">
+                <Step type="Automated" name="Assign Adjuster" />
+                <Step type="Human" name="Assess Vehicle Damage" />
+                <Step type="Approval" name="Adjuster Approval" />
+            </Process>
+        </Stage>
+        <Stage name="Claim Approval">
+            <Process name="Review and Approve">
+                <Step type="Human" name="Review Claim" />
+                <Step type="Approval" name="Approve or Reject Claim" />
+            </Process>
+        </Stage>
+        <Stage name="Claim Settlement">
+            <Process name="Process Payment">
+                <Step type="Automated" name="Calculate Payout" />
+                <Step type="Human" name="Confirm Payout" />
+                <Step type="Automated" name="Issue Payment" />
+            </Process>
+        </Stage>
+    </Stages>
+    <DataModel>
+        <DataElement name="ClaimantDetails" type="Page" class="AutoClaim-Data-Claimant" />
+        <DataElement name="VehicleDetails" type="Page" class="AutoClaim-Data-Vehicle" />
+        <DataElement name="DamageDetails" type="Page" class="AutoClaim-Data-Damage" />
+        <DataElement name="PaymentDetails" type="Page" class="AutoClaim-Data-Payment" />
+    </DataModel>
+</CaseType>

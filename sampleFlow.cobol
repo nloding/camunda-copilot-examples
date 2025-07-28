@@ -1,0 +1,76 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CAR-INSURANCE-SALES.
+       AUTHOR. CHATGPT.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 CUSTOMER-INFO.
+          05 CUSTOMER-NAME       PIC X(30).
+          05 CUSTOMER-AGE        PIC 99.
+          05 CUSTOMER-HISTORY    PIC X(10).
+          05 VEHICLE-TYPE        PIC X(15).
+       
+       01 INSURANCE-DETAILS.
+          05 QUOTE-AMOUNT        PIC 9(5)V99.
+          05 APPROVAL-STATUS     PIC X(10).
+       
+       01 USER-RESPONSE          PIC X(1).
+       01 RETRY-COUNTER          PIC 9 VALUE 0.
+       01 MAX-RETRIES           PIC 9 VALUE 3.
+
+       PROCEDURE DIVISION.
+       MAIN-PROCESS.
+           PERFORM GATHER-CUSTOMER-INFO.
+           PERFORM CHECK-ELIGIBILITY.
+           IF APPROVAL-STATUS = 'APPROVED'
+               PERFORM GENERATE-QUOTE
+               PERFORM PRESENT-QUOTE
+               PERFORM HANDLE-DECISION
+           ELSE
+               DISPLAY 'CUSTOMER NOT ELIGIBLE FOR INSURANCE.'
+           END-IF.
+           STOP RUN.
+
+       GATHER-CUSTOMER-INFO.
+           DISPLAY 'ENTER CUSTOMER NAME:'.
+           ACCEPT CUSTOMER-NAME.
+           DISPLAY 'ENTER CUSTOMER AGE:'.
+           ACCEPT CUSTOMER-AGE.
+           DISPLAY 'ENTER VEHICLE TYPE:'.
+           ACCEPT VEHICLE-TYPE.
+           DISPLAY 'ENTER CUSTOMER CLAIM HISTORY (GOOD/BAD):'.
+           ACCEPT CUSTOMER-HISTORY.
+
+       CHECK-ELIGIBILITY.
+           IF CUSTOMER-AGE < 18 OR CUSTOMER-HISTORY = 'BAD'
+               MOVE 'REJECTED' TO APPROVAL-STATUS
+           ELSE
+               MOVE 'APPROVED' TO APPROVAL-STATUS
+           END-IF.
+
+       GENERATE-QUOTE.
+           COMPUTE QUOTE-AMOUNT = 500 + (CUSTOMER-AGE * 10).
+
+       PRESENT-QUOTE.
+           DISPLAY 'INSURANCE QUOTE: ' QUOTE-AMOUNT.
+           DISPLAY 'DO YOU ACCEPT? (Y/N)'.
+           ACCEPT USER-RESPONSE.
+
+       HANDLE-DECISION.
+           IF USER-RESPONSE = 'Y'
+               DISPLAY 'INSURANCE PURCHASED SUCCESSFULLY!'
+           ELSE
+               ADD 1 TO RETRY-COUNTER
+               IF RETRY-COUNTER < MAX-RETRIES
+                   DISPLAY 'WOULD YOU LIKE TO RECONSIDER? (Y/N)'
+                   ACCEPT USER-RESPONSE
+                   IF USER-RESPONSE = 'Y'
+                       PERFORM PRESENT-QUOTE
+                       PERFORM HANDLE-DECISION
+                   ELSE
+                       DISPLAY 'CUSTOMER DECLINED INSURANCE.'
+                   END-IF
+               ELSE
+                   DISPLAY 'MAXIMUM ATTEMPTS REACHED. PROCESS TERMINATED.'
+               END-IF
+           END-IF.
